@@ -1,0 +1,24 @@
+{
+  "name": "feward-landing",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.2",
+    "@vitejs/plugin-react": "^4.7.0",
+    "express": "^5.2.1",
+    "firebase": "^12.16.0",
+    "lucide-react": "^0.383.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "vite": "^7.3.6"
+  }
+}

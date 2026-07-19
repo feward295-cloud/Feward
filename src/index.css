@@ -1,0 +1,329 @@
+:root {
+  --bg: #0b0a16;
+  --bg-elev: #15121f;
+  --bg-elev-2: #1c1829;
+  --ink: #f5f3ff;
+  --ink-soft: #c8c2dc;
+  --muted: #8b84a6;
+  --line: #2a2538;
+  --purple: #7c5cfc;
+  --purple-dark: #5e3fe0;
+  --purple-light: #a78bfa;
+  --purple-glow: rgba(124, 92, 252, 0.35);
+  --pink: #f472b6;
+  --green: #34d399;
+  --red: #fb7185;
+  --white: #ffffff;
+  --shadow: 0 24px 60px -24px rgba(124, 92, 252, 0.45);
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image: radial-gradient(circle at 12% 0%, rgba(124, 92, 252, 0.16), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(244, 114, 182, 0.08), transparent 40%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--purple);
+  color: var(--white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--purple-light);
+  outline-offset: 3px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elev-2);
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESPONSIVIDADE MOBILE (qualquer celular, portrait ou landscape)
+   ─────────────────────────────────────────────────────────────────────────
+   Estratégia: no desktop, a barra lateral e o painel direito ficam visíveis
+   (layout de 3 colunas). Abaixo de 880px, escondemos essas duas colunas e
+   trocamos por uma barra superior fixa (logo + "mais opções") e uma barra
+   inferior fixa de navegação, no estilo dos apps de rede social em celular.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.fw-mobile-topbar,
+.fw-mobile-bottomnav,
+.fw-mobile-menu-overlay {
+  display: none;
+}
+
+@media (max-width: 880px) {
+  .fw-sidebar-desktop,
+  .fw-panel-desktop {
+    display: none !important;
+  }
+
+  .fw-shell {
+    display: block !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  .fw-center-col {
+    display: block;
+    padding: 64px 12px calc(78px + env(safe-area-inset-bottom, 0px));
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .fw-mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: rgba(11, 10, 22, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    z-index: 60;
+  }
+
+  .fw-mobile-logo-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .fw-mobile-logo-word {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+  }
+
+  .fw-mobile-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .fw-mobile-menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 5, 12, 0.55);
+    z-index: 65;
+  }
+
+  .fw-mobile-menu {
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top, 0px) + 8px);
+    right: 12px;
+    left: 12px;
+    max-width: 260px;
+    margin-left: auto;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.55);
+  }
+
+  .fw-mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 14.5;
+    font-weight: 500;
+    padding: 11px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+  }
+
+  .fw-mobile-menu-item:active {
+    background: var(--bg-elev-2);
+  }
+
+  .fw-mobile-bottomnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(11, 10, 22, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line);
+    z-index: 60;
+  }
+
+  .fw-mobile-nav-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .fw-mobile-nav-btn.active {
+    color: var(--purple-light);
+  }
+
+  .fw-mobile-nav-badge {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: var(--pink);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fw-mobile-nav-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, var(--purple-light), var(--purple));
+    color: var(--white);
+    box-shadow: 0 10px 24px -8px var(--purple-glow);
+    cursor: pointer;
+    margin-top: -20px;
+  }
+
+  .fw-chat-col {
+    height: calc(100vh - 56px - 64px - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    margin: 0 -12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .fw-mobile-menu {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESPONSIVIDADE — LANDING PAGE (FewardLanding)
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fw-landing-hero {
+    grid-template-columns: 1fr !important;
+    padding-top: 8px !important;
+    gap: 32px !important;
+  }
+
+  .fw-landing-phone-wrap {
+    justify-self: center;
+  }
+
+  .fw-landing-steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .fw-landing-nav {
+    padding: 16px !important;
+  }
+
+  .fw-landing-phone-wrap > div:first-child {
+    width: 240px !important;
+    height: 480px !important;
+  }
+
+  .fw-landing-cta-card {
+    padding: 36px 22px !important;
+    border-radius: 20px !important;
+  }
+}

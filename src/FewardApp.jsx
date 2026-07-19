@@ -192,6 +192,41 @@ const STYLES = `
 .few2 .fw-toast { position: fixed; top: 20px; left: 50%; transform: translate(-50%,-140%); background: linear-gradient(180deg,#0f1a13,#081008); border: 1px solid #2fd97a55; color: #c9ffe0; padding: 12px 22px; border-radius: 999px; font-size: 13px; letter-spacing: .5px; box-shadow: 0 0 24px -6px rgba(47,217,120,.6); transition: transform .4s cubic-bezier(.34,1.56,.64,1); z-index: 100; max-width: 90vw; text-align: center; }
 .few2 .fw-toast.fw-show { transform: translate(-50%,0); }
 
+.few2 .fw-credits-fab {
+  position: fixed; top: 16px; right: 16px; z-index: 55;
+  background: linear-gradient(180deg, #26232f, #0e0c14); border: 1px solid rgba(255,255,255,0.25);
+  color: var(--ink); font-weight: 700; font-size: 12.5px; letter-spacing: 1px;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+}
+.few2 .fw-credits-fab:hover { border-color: var(--cyan); color: var(--cyan); }
+@media (max-width: 900px) {
+  .few2 .fw-credits-fab { top: 8px; right: 8px; padding: 7px 14px; font-size: 11.5px; }
+}
+
+.few2 .fw-credits-btn {
+  position: absolute; top: 20px; right: 20px; z-index: 5;
+  background: linear-gradient(180deg, #26232f, #0e0c14); border: 1px solid rgba(255,255,255,0.25);
+  color: var(--ink); font-weight: 700; font-size: 12.5px; letter-spacing: 1px;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+}
+.few2 .fw-credits-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.few2 .fw-credits-screen { position: relative; z-index: 1; min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+.few2 .fw-credits-left { background: linear-gradient(160deg,#ff5c5c,var(--red) 60%,var(--red-dark)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+.few2 .fw-credits-left h1 { font-family: "Poppins", sans-serif; font-weight: 900; font-style: italic; font-size: 30px; margin: 0; color: #0a0a0a; line-height: 1.25; }
+.few2 .fw-credits-thanks { background: var(--blue); border-radius: 18px; padding: 22px 26px; margin-top: 26px; color: #fff; }
+.few2 .fw-credits-thanks p { margin: 4px 0; font-weight: 700; font-size: 15px; }
+.few2 .fw-credits-thanks span { display: block; font-size: 12.5px; font-weight: 600; color: #cfd0ff; margin-top: 10px; }
+.few2 .fw-credits-right { background: linear-gradient(160deg,#ff5c5c,var(--red) 60%,var(--red-dark)); padding: 60px 44px; display: flex; flex-direction: column; gap: 26px; justify-content: center; }
+.few2 .fw-credits-person b { display: block; font-size: 18px; font-family: "Poppins", sans-serif; font-weight: 800; font-style: italic; color: #0a0a0a; }
+.few2 .fw-credits-person span { display: block; font-size: 13.5px; font-weight: 700; color: #2b0a0a; margin-top: 4px; }
+.few2 .fw-credits-back { position: absolute; top: 20px; left: 20px; z-index: 5; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 999px; cursor: pointer; }
+.few2 .fw-credits-back:hover { background: rgba(0,0,0,0.55); }
+@media (max-width: 720px) {
+  .few2 .fw-credits-screen { grid-template-columns: 1fr; }
+  .few2 .fw-credits-left h1 { font-size: 24px; }
+  .few2 .fw-credits-right { padding: 32px 26px; }
+}
+
 .few2 .fw-mobilenav { display: none; }
 
 @media (max-width: 900px) {
@@ -322,8 +357,40 @@ function PasswordField({ id, label, value, onChange, error, placeholder, autoCom
   );
 }
 
+/* ── Créditos ── */
+function CreditsScreen({ onBack }) {
+  return (
+    <div className="fw-credits-screen">
+      <button className="fw-credits-back" onClick={onBack}>← Voltar</button>
+      <div className="fw-credits-left">
+        <h1>Créditos e<br />agradecimentos<br />FEWARD</h1>
+        <div className="fw-credits-thanks">
+          <p>Agradecimento a</p>
+          <p>Arthur Pereira</p>
+          <p>Maria Eduarda</p>
+          <span>por sempre apoiar o projeto</span>
+        </div>
+      </div>
+      <div className="fw-credits-right">
+        <div className="fw-credits-person">
+          <b>Pedro Rafael (DDRK)</b>
+          <span>(criador e programador da Feward)</span>
+        </div>
+        <div className="fw-credits-person">
+          <b>Christopher (Nullirã)</b>
+          <span>(Adm da Feward)</span>
+        </div>
+        <div className="fw-credits-person">
+          <b>Tony</b>
+          <span>(nos ajudou na identidade visual, ajudou em fazer a Feward por um determinado tempo e programou um dos primeiros visuais)</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Login ── */
-function LoginScreen({ onGoSignup, onLogin, showToast }) {
+function LoginScreen({ onGoSignup, onLogin, onShowCredits, showToast }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -350,6 +417,7 @@ function LoginScreen({ onGoSignup, onLogin, showToast }) {
 
   return (
     <div className="fw-nebula">
+      <button className="fw-credits-btn" onClick={onShowCredits}>Créditos</button>
       <div className="fw-auth-shell">
         <FewHex />
         <div className="fw-tagline">Tecnologia e o futuro</div>
@@ -397,7 +465,7 @@ function LoginScreen({ onGoSignup, onLogin, showToast }) {
 }
 
 /* ── Cadastro ── */
-function SignupScreen({ onGoLogin, onSignup, showToast }) {
+function SignupScreen({ onGoLogin, onSignup, onShowCredits, showToast }) {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -426,6 +494,7 @@ function SignupScreen({ onGoLogin, onSignup, showToast }) {
 
   return (
     <div className="fw-nebula fw-nebula-swap">
+      <button className="fw-credits-btn" onClick={onShowCredits}>Créditos</button>
       <div className="fw-auth-shell">
         <FewHex />
         <div className="fw-tagline" style={{ fontWeight: 700, letterSpacing: "3px" }}>Criar conta Feward</div>
@@ -776,13 +845,14 @@ function SavedTab({ posts, user, onToggleLike, onAddComment, onToggleSaved }) {
   );
 }
 
-function ProfileTab({ user, posts, onUpdateUser, onLogout, showToast }) {
+function ProfileTab({ user, posts, onUpdateUser, onLogout, onDeleteAccount, showToast }) {
   const [editingName, setEditingName] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
   const [nameDraft, setNameDraft] = useState(user.name);
   const [bioDraft, setBioDraft] = useState(user.bio || "");
   const [showRecados, setShowRecados] = useState(false);
   const [recadoText, setRecadoText] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef(null);
 
   useEffect(() => { setNameDraft(user.name); setBioDraft(user.bio || ""); }, [user.name, user.bio]);
@@ -858,6 +928,16 @@ function ProfileTab({ user, posts, onUpdateUser, onLogout, showToast }) {
           <div className="fw-profile-link"><User size={16} /> Perfil</div>
           <div className="fw-profile-link" onClick={() => setShowRecados((s) => !s)}><MessageCircle size={16} /> Recado</div>
           <div className="fw-profile-link fw-exit" onClick={onLogout}><LogOut size={16} /> Sair</div>
+          <div
+            className="fw-profile-link"
+            style={{ color: "#ff8a8a" }}
+            onClick={() => {
+              if (confirmDelete) onDeleteAccount();
+              else { setConfirmDelete(true); showToast("Toque novamente para confirmar a exclusão."); }
+            }}
+          >
+            <X size={16} /> {confirmDelete ? "Confirmar exclusão" : "Deletar"}
+          </div>
         </div>
       </aside>
 
@@ -955,7 +1035,7 @@ function AppShell({ user, tab, setTab, posts, onLogout, onUpdateUser, onCreatePo
   } else if (tab === "saved") {
     content = <div className="fw-main"><SavedTab posts={posts} user={user} onToggleLike={onToggleLike} onAddComment={onAddComment} onToggleSaved={onToggleSaved} /></div>;
   } else if (tab === "profile") {
-    content = <ProfileTab user={user} posts={posts} onUpdateUser={onUpdateUser} onLogout={onLogout} showToast={showToast} />;
+    content = <ProfileTab user={user} posts={posts} onUpdateUser={onUpdateUser} onLogout={onLogout} onDeleteAccount={onDeleteAccount} showToast={showToast} />;
   } else if (tab === "settings") {
     content = <div className="fw-main"><SettingsTab user={user} onUpdateUser={onUpdateUser} onLogout={onLogout} onDeleteAccount={onDeleteAccount} showToast={showToast} /></div>;
   }
@@ -976,6 +1056,7 @@ export default function FewardApp() {
   const [posts, setPosts] = useState([]);
   const [sessionEmail, setSessionEmail] = useState(null);
   const [authView, setAuthView] = useState("login");
+  const [showCredits, setShowCredits] = useState(false);
   const [tab, setTab] = useState("home");
   const [toast, showToast] = useToast();
 
@@ -1090,13 +1171,24 @@ export default function FewardApp() {
     );
   }
 
+  if (showCredits) {
+    return (
+      <div className="few2">
+        <style>{STYLES}</style>
+        <CreditsScreen onBack={() => setShowCredits(false)} />
+      </div>
+    );
+  }
+
   if (!currentUser) {
     return (
       <div className="few2">
         <style>{STYLES}</style>
-        {authView === "login"
-          ? <LoginScreen onGoSignup={() => setAuthView("signup")} onLogin={login} showToast={showToast} />
-          : <SignupScreen onGoLogin={() => setAuthView("login")} onSignup={signup} showToast={showToast} />}
+        {authView === "login" ? (
+          <LoginScreen onGoSignup={() => setAuthView("signup")} onLogin={login} onShowCredits={() => setShowCredits(true)} showToast={showToast} />
+        ) : (
+          <SignupScreen onGoLogin={() => setAuthView("login")} onSignup={signup} onShowCredits={() => setShowCredits(true)} showToast={showToast} />
+        )}
         <div className={`fw-toast ${toast.show ? "fw-show" : ""}`}>{toast.msg}</div>
       </div>
     );
@@ -1105,6 +1197,7 @@ export default function FewardApp() {
   return (
     <div className="few2">
       <style>{STYLES}</style>
+      <button className="fw-credits-fab" onClick={() => setShowCredits(true)}>Créditos</button>
       <AppShell
         user={currentUser} tab={tab} setTab={setTab} posts={posts}
         onLogout={logout} onUpdateUser={updateCurrentUser} onCreatePost={createPost}

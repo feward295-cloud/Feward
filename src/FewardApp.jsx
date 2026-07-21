@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Home, Search, Users, Send, Bell, Bookmark, User, Settings, LogOut,
   Image as ImageIcon, Camera, Video, Code2, MessageCircle, Heart,
-  Pencil, Check, X, Eye, EyeOff,
+  Pencil, Check, X, Eye, EyeOff, Plus,
 } from "lucide-react";
 
 /* ────────────────────────────────────────────────────────────────────────
    FEWARD — recriação funcional das telas do PDF de referência.
    Login/cadastro reais, perfil editável (foto, nome, bio), feed com
-   publicação de fotos/textos, curtidas, comentários, salvos, comunidades.
+   publicação de fotos/textos, curtidas, comentários, salvos, comunidades
+   (com criação de comunidade pelo usuário).
    Dados persistem em window.storage (não usa localStorage).
    Equipe FEW — Pedro · Chris Brum · Tony · Eduarda — Versão 1.0.0
    ──────────────────────────────────────────────────────────────────────── */
@@ -16,6 +17,27 @@ import {
 const USERS_KEY = "feward:users";
 const SESSION_KEY = "feward:session";
 const POSTS_KEY = "feward:posts";
+const COMMUNITIES_KEY = "feward:communities";
+
+function defaultCommunities() {
+  const now = new Date().toISOString();
+  return [
+    { id: "c-jogos", name: "Jogos", description: "Tudo sobre games.", color: "linear-gradient(160deg,#3a3a3f,#1c1c20)", members: [], createdAt: now },
+    { id: "c-animes", name: "Animes", description: "Fãs de anime e mangá.", color: "linear-gradient(160deg,#4a4a50,#222226)", members: [], createdAt: now },
+    { id: "c-prog", name: "Programação", description: "Devs e curiosos de tech.", color: "linear-gradient(160deg,#2fd9ff,#0a6fa8)", members: [], createdAt: now },
+    { id: "c-circus", name: "Digital Circus", description: "Comunidade da série.", color: "linear-gradient(160deg,#e8262c,#7a1013)", members: [], createdAt: now },
+    { id: "c-fanart", name: "FanArte", description: "Arte feita por fãs.", color: "linear-gradient(160deg,#0a0f2e,#1c1470)", members: [], createdAt: now },
+  ];
+}
+
+const COMMUNITY_COLORS = [
+  "linear-gradient(160deg,#3a3a3f,#1c1c20)",
+  "linear-gradient(160deg,#0a0f2e,#1c1470)",
+  "linear-gradient(160deg,#2fd9ff,#0a6fa8)",
+  "linear-gradient(160deg,#e8262c,#7a1013)",
+  "linear-gradient(160deg,#34d399,#0a6f4a)",
+  "linear-gradient(160deg,#f472b6,#7a1050)",
+];
 
 const STYLES = `
 .few2 {
@@ -181,6 +203,15 @@ const STYLES = `
 .few2 .fw-join-btn { padding: 8px 16px; border-radius: 999px; border: none; font-weight: 700; font-size: 12.5px; cursor: pointer; background: linear-gradient(180deg,#d81f1f,#971414); color: #fff; }
 .few2 .fw-join-btn.joined { background: linear-gradient(180deg,#2fd9ff,#0a6fa8); }
 
+.few2 .fw-comm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.few2 .fw-comm-card { border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 150px; color: #fff; }
+.few2 .fw-comm-card-name { font-family: "Poppins", sans-serif; font-weight: 800; font-size: 20px; }
+.few2 .fw-comm-card-desc { font-size: 13px; opacity: .85; margin-top: 6px; line-height: 1.4; }
+.few2 .fw-comm-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; font-size: 12px; opacity: .9; }
+.few2 .fw-comm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.few2 .fw-comm-modal { background: linear-gradient(180deg,#16161c,#0a0a0e); border: 1px solid var(--line); border-radius: 20px; padding: 24px; width: 100%; max-width: 380px; }
+@media (max-width: 600px) { .few2 .fw-comm-grid { grid-template-columns: 1fr; } }
+
 .few2 .fw-emptystate { color: var(--muted); font-size: 14px; padding: 50px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
 .few2 .fw-editrow { display: flex; gap: 8px; align-items: center; }
@@ -191,17 +222,6 @@ const STYLES = `
 
 .few2 .fw-toast { position: fixed; top: 20px; left: 50%; transform: translate(-50%,-140%); background: linear-gradient(180deg,#0f1a13,#081008); border: 1px solid #2fd97a55; color: #c9ffe0; padding: 12px 22px; border-radius: 999px; font-size: 13px; letter-spacing: .5px; box-shadow: 0 0 24px -6px rgba(47,217,120,.6); transition: transform .4s cubic-bezier(.34,1.56,.64,1); z-index: 100; max-width: 90vw; text-align: center; }
 .few2 .fw-toast.fw-show { transform: translate(-50%,0); }
-
-.few2 .fw-credits-fab {
-  position: fixed; top: 16px; right: 16px; z-index: 55;
-  background: linear-gradient(180deg, #26232f, #0e0c14); border: 1px solid rgba(255,255,255,0.25);
-  color: var(--ink); font-weight: 700; font-size: 12.5px; letter-spacing: 1px;
-  padding: 9px 18px; border-radius: 999px; cursor: pointer;
-}
-.few2 .fw-credits-fab:hover { border-color: var(--cyan); color: var(--cyan); }
-@media (max-width: 900px) {
-  .few2 .fw-credits-fab { top: 8px; right: 8px; padding: 7px 14px; font-size: 11.5px; }
-}
 
 .few2 .fw-credits-btn {
   position: absolute; top: 20px; right: 20px; z-index: 5;
@@ -790,27 +810,105 @@ function ExploreTab({ posts, user, onToggleLike, onAddComment, onToggleSaved }) 
   );
 }
 
-function CommunityTab({ user, onUpdateUser }) {
-  const communities = ["Jogos", "Animes", "Programação", "Digital Circus", "FanArte"];
-  const joined = user.communities || [];
-  function toggle(name) {
-    const next = joined.includes(name) ? joined.filter((c) => c !== name) : [...joined, name];
-    onUpdateUser({ communities: next });
+/* ── Comunidade (com criação de comunidade) ── */
+function CreateCommunityModal({ onClose, onCreate }) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [colorIdx, setColorIdx] = useState(0);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    onCreate({ name: name.trim(), description: description.trim(), color: COMMUNITY_COLORS[colorIdx] });
+    onClose();
   }
+
   return (
-    <main className="fw-center">
-      <h1 className="fw-h1">Comunidade</h1>
-      {communities.map((name) => {
-        const isIn = joined.includes(name);
-        return (
-          <div className="fw-community-row" key={name}>
-            <span style={{ fontWeight: 700 }}>{name}</span>
-            <button className={`fw-join-btn ${isIn ? "joined" : ""}`} onClick={() => toggle(name)}>
-              {isIn ? "Participando" : "Participar"}
-            </button>
+    <div className="fw-comm-modal-overlay" onClick={onClose}>
+      <div className="fw-comm-modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="fw-h1" style={{ fontSize: 20, marginBottom: 16 }}>Nova comunidade</h2>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div className="fw-field">
+            <label>Nome da comunidade</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Speedrun BR" maxLength={40} />
           </div>
-        );
-      })}
+          <div className="fw-field">
+            <label>Descrição (opcional)</label>
+            <textarea className="fw-textarea" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={140} placeholder="Sobre o que é essa comunidade?" />
+          </div>
+          <div className="fw-field">
+            <label>Cor</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              {COMMUNITY_COLORS.map((c, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setColorIdx(i)}
+                  style={{
+                    width: 30, height: 30, borderRadius: "50%", background: c,
+                    border: colorIdx === i ? "3px solid var(--cyan)" : "2px solid transparent", cursor: "pointer",
+                  }}
+                  aria-label={`Cor ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+            <button type="button" className="fw-btn fw-btn-outline" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="fw-btn fw-btn-outline" style={{ background: "linear-gradient(180deg,#ff5252,#c41e1e)", color: "#fff", border: "none" }}>Criar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function CommunityTab({ user, communities, onJoinToggle, onCreateCommunity, showToast }) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <main className="fw-center" style={{ maxWidth: 760 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+        <h1 className="fw-h1" style={{ margin: 0 }}>Comunidade</h1>
+        <button
+          onClick={() => setShowModal(true)}
+          style={{
+            width: 38, height: 38, borderRadius: "50%", border: "none",
+            background: "linear-gradient(180deg,#ff5252,#c41e1e)", color: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+          }}
+          aria-label="Criar comunidade"
+        >
+          <Plus size={20} />
+        </button>
+      </div>
+
+      <div className="fw-comm-grid">
+        {communities.map((c) => {
+          const isIn = (c.members || []).includes(user.email);
+          return (
+            <div key={c.id} className="fw-comm-card" style={{ background: c.color }}>
+              <div>
+                <div className="fw-comm-card-name">{c.name}</div>
+                {c.description && <div className="fw-comm-card-desc">{c.description}</div>}
+              </div>
+              <div className="fw-comm-card-foot">
+                <span>{(c.members || []).length} membro{(c.members || []).length === 1 ? "" : "s"}</span>
+                <button className={`fw-join-btn ${isIn ? "joined" : ""}`} onClick={() => onJoinToggle(c.id)}>
+                  {isIn ? "Participando" : "Participar"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {showModal && (
+        <CreateCommunityModal
+          onClose={() => setShowModal(false)}
+          onCreate={(data) => { onCreateCommunity(data); showToast("Comunidade criada!"); }}
+        />
+      )}
     </main>
   );
 }
@@ -1015,7 +1113,7 @@ function SettingsTab({ user, onUpdateUser, onLogout, onDeleteAccount, showToast 
   );
 }
 
-function AppShell({ user, tab, setTab, posts, onLogout, onUpdateUser, onCreatePost, onToggleLike, onAddComment, onToggleSaved, onDeleteAccount, showToast }) {
+function AppShell({ user, tab, setTab, posts, communities, onLogout, onUpdateUser, onCreatePost, onToggleLike, onAddComment, onToggleSaved, onJoinCommunity, onCreateCommunity, onDeleteAccount, showToast }) {
   let content;
   if (tab === "home") {
     content = (
@@ -1027,7 +1125,17 @@ function AppShell({ user, tab, setTab, posts, onLogout, onUpdateUser, onCreatePo
   } else if (tab === "explore") {
     content = <div className="fw-main"><ExploreTab posts={posts} user={user} onToggleLike={onToggleLike} onAddComment={onAddComment} onToggleSaved={onToggleSaved} /></div>;
   } else if (tab === "community") {
-    content = <div className="fw-main"><CommunityTab user={user} onUpdateUser={onUpdateUser} /></div>;
+    content = (
+      <div className="fw-main">
+        <CommunityTab
+          user={user}
+          communities={communities}
+          onJoinToggle={onJoinCommunity}
+          onCreateCommunity={onCreateCommunity}
+          showToast={showToast}
+        />
+      </div>
+    );
   } else if (tab === "messages") {
     content = <div className="fw-main"><MessagesTab /></div>;
   } else if (tab === "notifications") {
@@ -1050,11 +1158,12 @@ function AppShell({ user, tab, setTab, posts, onLogout, onUpdateUser, onCreatePo
 }
 
 /* ── App raiz ── */
-export default function FewardApp() {
+export default function FewardApp({ user: authUser, onLogout: onLogoutProp }) {
   const [booted, setBooted] = useState(false);
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [sessionEmail, setSessionEmail] = useState(null);
+  const [communities, setCommunities] = useState([]);
+  const [sessionEmail, setSessionEmail] = useState(authUser?.email || null);
   const [authView, setAuthView] = useState("login");
   const [showCredits, setShowCredits] = useState(false);
   const [tab, setTab] = useState("home");
@@ -1062,19 +1171,56 @@ export default function FewardApp() {
 
   useEffect(() => {
     (async () => {
-      const u = await loadJSON(USERS_KEY, []);
+      let u = await loadJSON(USERS_KEY, []);
       let p = await loadJSON(POSTS_KEY, null);
       if (!p) { p = seedPosts(); await saveJSON(POSTS_KEY, p); }
+      let c = await loadJSON(COMMUNITIES_KEY, null);
+      if (!c) { c = defaultCommunities(); await saveJSON(COMMUNITIES_KEY, c); }
+
+      if (authUser?.email) {
+        // Ja logado via Supabase (FewLogin): garante um perfil local basico
+        // para essa conta, sem pedir login de novo aqui dentro.
+        const jaExiste = u.some((x) => x.email === authUser.email);
+        if (!jaExiste) {
+          u = [...u, {
+            email: authUser.email,
+            username: authUser.email.split("@")[0],
+            name: authUser.nome || authUser.name || "",
+            bio: "",
+            avatar: null,
+            password: null,
+          }];
+          await saveJSON(USERS_KEY, u);
+        }
+        setUsers(u); setPosts(p); setCommunities(c); setSessionEmail(authUser.email); setBooted(true);
+        return;
+      }
+
       let s = null;
       try { const r = await window.storage.get(SESSION_KEY, false); s = r ? r.value : null; } catch { s = null; }
-      setUsers(u); setPosts(p); setSessionEmail(s); setBooted(true);
+      setUsers(u); setPosts(p); setCommunities(c); setSessionEmail(s); setBooted(true);
     })();
-  }, []);
+  }, [authUser]);
 
-  const currentUser = users.find((u) => u.email === sessionEmail) || null;
+  const localUser = users.find((u) => u.email === sessionEmail) || null;
+  // Se veio autenticado do Supabase (FewLogin) mas ainda não existe um perfil
+  // local (username/bio/avatar) para essa conta, cria um perfil basico na hora.
+  const currentUser =
+    localUser ||
+    (authUser
+      ? {
+          email: authUser.email,
+          username: authUser.email ? authUser.email.split("@")[0] : "usuario",
+          name: authUser.nome || authUser.name || "",
+          bio: "",
+          avatar: null,
+          password: null,
+        }
+      : null);
 
   async function persistUsers(next) { setUsers(next); await saveJSON(USERS_KEY, next); }
   async function persistPosts(next) { setPosts(next); await saveJSON(POSTS_KEY, next); }
+  async function persistCommunities(next) { setCommunities(next); await saveJSON(COMMUNITIES_KEY, next); }
 
   async function login(email, password) {
     const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
@@ -1111,6 +1257,7 @@ export default function FewardApp() {
   async function logout() {
     setSessionEmail(null); setTab("home");
     try { await window.storage.delete(SESSION_KEY, false); } catch { /* noop */ }
+    if (onLogoutProp) onLogoutProp();
   }
 
   function updateCurrentUser(patch) {
@@ -1152,6 +1299,27 @@ export default function FewardApp() {
     persistPosts(next);
   }
 
+  function joinCommunity(communityId) {
+    const next = communities.map((c) => {
+      if (c.id !== communityId) return c;
+      const members = c.members || [];
+      const isIn = members.includes(currentUser.email);
+      return { ...c, members: isIn ? members.filter((e) => e !== currentUser.email) : [...members, currentUser.email] };
+    });
+    persistCommunities(next);
+  }
+
+  function createCommunity({ name, description, color }) {
+    const community = {
+      id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name, description, color,
+      members: [currentUser.email],
+      createdBy: currentUser.email,
+      createdAt: new Date().toISOString(),
+    };
+    persistCommunities([community, ...communities]);
+  }
+
   function deleteAccount() {
     const nextUsers = users.filter((u) => u.email !== currentUser.email);
     const nextPosts = posts.filter((p) => p.authorEmail !== currentUser.email);
@@ -1171,20 +1339,13 @@ export default function FewardApp() {
     );
   }
 
-  if (showCredits) {
-    return (
-      <div className="few2">
-        <style>{STYLES}</style>
-        <CreditsScreen onBack={() => setShowCredits(false)} />
-      </div>
-    );
-  }
-
   if (!currentUser) {
     return (
       <div className="few2">
         <style>{STYLES}</style>
-        {authView === "login" ? (
+        {showCredits ? (
+          <CreditsScreen onBack={() => setShowCredits(false)} />
+        ) : authView === "login" ? (
           <LoginScreen onGoSignup={() => setAuthView("signup")} onLogin={login} onShowCredits={() => setShowCredits(true)} showToast={showToast} />
         ) : (
           <SignupScreen onGoLogin={() => setAuthView("login")} onSignup={signup} onShowCredits={() => setShowCredits(true)} showToast={showToast} />
@@ -1197,11 +1358,11 @@ export default function FewardApp() {
   return (
     <div className="few2">
       <style>{STYLES}</style>
-      <button className="fw-credits-fab" onClick={() => setShowCredits(true)}>Créditos</button>
       <AppShell
-        user={currentUser} tab={tab} setTab={setTab} posts={posts}
+        user={currentUser} tab={tab} setTab={setTab} posts={posts} communities={communities}
         onLogout={logout} onUpdateUser={updateCurrentUser} onCreatePost={createPost}
         onToggleLike={toggleLike} onAddComment={addComment} onToggleSaved={toggleSaved}
+        onJoinCommunity={joinCommunity} onCreateCommunity={createCommunity}
         onDeleteAccount={deleteAccount} showToast={showToast}
       />
       <div className={`fw-toast ${toast.show ? "fw-show" : ""}`}>{toast.msg}</div>
